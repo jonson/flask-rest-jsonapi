@@ -79,6 +79,10 @@ def jsonapi_exception_formatter(func):
         try:
             return func(*args, **kwargs)
         except JsonApiException as e:
+            if isinstance(e.status, str) and e.status and e.status[0] == '5':
+                error_log.exception("Exception while processing request")
+            elif isinstance(e.status, int) and 500 <= e.status <= 599:
+                error_log.exception("Exception while processing request")
             return make_response(jsonify(jsonapi_errors([e.to_dict()])),
                                  e.status,
                                  headers)
