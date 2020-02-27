@@ -3,6 +3,7 @@
 """Decorators to check headers and method requirements for each Api calls"""
 
 import json
+import logging
 from functools import wraps
 
 from flask import request, make_response, jsonify, current_app
@@ -10,6 +11,9 @@ from flask import request, make_response, jsonify, current_app
 from flask_rest_jsonapi.errors import jsonapi_errors
 from flask_rest_jsonapi.exceptions import JsonApiException
 from flask_rest_jsonapi.utils import JSONEncoder
+
+
+error_log = logging.getLogger(__name__)
 
 
 def check_headers(func):
@@ -84,6 +88,8 @@ def jsonapi_exception_formatter(func):
 
             if 'sentry' in current_app.extensions:
                 current_app.extensions['sentry'].captureException()
+
+            error_log.exception('Unhandled exception while processing request')
 
             exc = JsonApiException(getattr(e,
                                            'detail',
